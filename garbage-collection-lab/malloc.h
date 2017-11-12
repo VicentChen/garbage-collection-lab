@@ -1,4 +1,4 @@
-#ifndef __MALLOC_H_
+﻿#ifndef __MALLOC_H_
 #define __MALLOC_H_
 
 /* $Id$ */

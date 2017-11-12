@@ -1,4 +1,4 @@
-#ifndef __DUMP_H_
+﻿#ifndef __DUMP_H_
 #define __DUMP_H_
 
 /* $Id$ */

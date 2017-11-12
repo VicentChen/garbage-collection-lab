@@ -1,4 +1,4 @@
-/* define type ptr_t as "long int" for various pointer arithmetic operations */
+﻿/* define type ptr_t as "long int" for various pointer arithmetic operations */
 
 #define ptr_t long int
 

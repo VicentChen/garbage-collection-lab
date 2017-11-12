@@ -1,4 +1,4 @@
-/* Utility for timing function evaluations */
+﻿/* Utility for timing function evaluations */
 
 /**
  * Win32 Realization

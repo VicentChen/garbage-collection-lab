@@ -1,4 +1,4 @@
-/*
+﻿/*
                 An implementation of top-down splaying
                     D. Sleator <sleator@cs.cmu.edu>
     	                     March 1992

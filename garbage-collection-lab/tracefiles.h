@@ -1,4 +1,4 @@
-#ifndef __TRACEFILES_H_
+﻿#ifndef __TRACEFILES_H_
 #define __TRACEFILES_H_
 
 /* $Id$ */

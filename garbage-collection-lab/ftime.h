@@ -1,4 +1,4 @@
-/* Function timer */
+﻿/* Function timer */
 
 #ifdef ALPHA
 # define ftime ftime_alpha

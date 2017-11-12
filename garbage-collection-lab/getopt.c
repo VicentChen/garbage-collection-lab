@@ -1,4 +1,4 @@
-// Taken from http://lottery.merseyworld.com/Wheel/
+﻿// Taken from http://lottery.merseyworld.com/Wheel/
 
 /* Getopt for GNU.
    NOTE: getopt is now part of the C library, so if you don't know what
