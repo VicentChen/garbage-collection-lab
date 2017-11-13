@@ -17,3 +17,10 @@
  - tracefiles.h: 测试文件
  - unistd.h
  - tailor.h
+
+# TODO
+ - 基于原设计的简单垃圾回收器
+ - 基于空间复制的垃圾回收器
+ - Serial GC
+ - Parallel GC
+ - Generational GC
