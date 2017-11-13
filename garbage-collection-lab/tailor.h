@@ -4,11 +4,11 @@
  * terms of the GNU General Public License, see the file COPYING.
  */
 
-/* The target dependent definitions should be defined here only.
- * The target dependent functions should be defined in tailor.c.
- */
+ /* The target dependent definitions should be defined here only.
+  * The target dependent functions should be defined in tailor.c.
+  */
 
-/* $Id: tailor.h,v 0.18 1993/06/14 19:32:20 jloup Exp $ */
+  /* $Id: tailor.h,v 0.18 1993/06/14 19:32:20 jloup Exp $ */
 
 #if defined(__MSDOS__) && !defined(MSDOS)
 #  define MSDOS
@@ -134,8 +134,8 @@
 #    include <alloc.h>
 #    define DYN_ALLOC
      /* Turbo C 2.0 does not accept static allocations of large arrays */
-     void * fcalloc (unsigned items, unsigned size);
-     void fcfree (void *ptr);
+void * fcalloc(unsigned items, unsigned size);
+void fcfree(void *ptr);
 #  else /* MSC */
 #    include <malloc.h>
 #    define fcalloc(nitems,itemsize) halloc((long)(nitems),(itemsize))
@@ -187,7 +187,7 @@
 #    define NO_FCNTL_H
 #    include <fcntl.h> /* for read() and write() */
 #    define direct dirent
-     extern void _expand_args(int *argc, char ***argv);
+extern void _expand_args(int *argc, char ***argv);
 #    define EXPAND(argc,argv) _expand_args(&argc,&argv);
 #    undef  O_BINARY /* disable useless --ascii option */
 #  endif
@@ -262,7 +262,7 @@
 #endif
 
 
-	/* Common defaults */
+/* Common defaults */
 
 #ifndef OS_CODE
 #  define OS_CODE  0x03  /* assume Unix */

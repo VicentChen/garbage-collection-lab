@@ -1,7 +1,7 @@
 ﻿/*
                 An implementation of top-down splaying
                     D. Sleator <sleator@cs.cmu.edu>
-    	                     March 1992
+                             March 1992
 
   "Splay trees", or "self-adjusting search trees" are a simple and
   efficient data structure for storing an ordered set.  The data
@@ -40,11 +40,11 @@
   [5] "Data Structures, Algorithms, and Performance", Derick Wood,
        Addison-Wesley, 1993, pp 367-375.
 
-  - modified by A. Brown, March 2000 
+  - modified by A. Brown, March 2000
   - trees do not store the key explicitly, instead, the key value for a particular
-    node is that node's address. (i.e. the tree is sorted by the addresses of the 
+    node is that node's address. (i.e. the tree is sorted by the addresses of the
     allocated blocks)
-  - each node stores that amount of allocated space returned by gc_malloc in the 
+  - each node stores that amount of allocated space returned by gc_malloc in the
     "size" field
 
 */
@@ -58,40 +58,42 @@
 /* What it does is described above.                             */
 /****************************************************************/
 
-Tree * splay (ptr_t i, Tree *t) {
+Tree * splay(ptr_t i, Tree *t) {
     Tree N, *l, *r, *y;
     if (t == NULL) return t;
     N.left = N.right = NULL;
     l = r = &N;
 
     for (;;) {
-	if (i < (ptr_t)t) {
-	    if (t->left == NULL) break;
-	    if (i < (ptr_t)t->left) {
-		y = t->left;                           /* rotate right */
-		t->left = y->right;
-		y->right = t;
-		t = y;
-		if (t->left == NULL) break;
-	    }
-	    r->left = t;                               /* link right */
-	    r = t;
-	    t = t->left;
-	} else if (i > (ptr_t)t) {
-	    if (t->right == NULL) break;
-	    if (i > (ptr_t)t->right) {
-		y = t->right;                          /* rotate left */
-		t->right = y->left;
-		y->left = t;
-		t = y;
-		if (t->right == NULL) break;
-	    }
-	    l->right = t;                              /* link left */
-	    l = t;
-	    t = t->right;
-	} else {
-	    break;
-	}
+        if (i < (ptr_t)t) {
+            if (t->left == NULL) break;
+            if (i < (ptr_t)t->left) {
+                y = t->left;                           /* rotate right */
+                t->left = y->right;
+                y->right = t;
+                t = y;
+                if (t->left == NULL) break;
+            }
+            r->left = t;                               /* link right */
+            r = t;
+            t = t->left;
+        }
+        else if (i > (ptr_t)t) {
+            if (t->right == NULL) break;
+            if (i > (ptr_t)t->right) {
+                y = t->right;                          /* rotate left */
+                t->right = y->left;
+                y->left = t;
+                t = y;
+                if (t->right == NULL) break;
+            }
+            l->right = t;                              /* link left */
+            l = t;
+            t = t->right;
+        }
+        else {
+            break;
+        }
     }
     l->right = t->left;                                /* assemble */
     r->left = t->right;
@@ -108,24 +110,26 @@ Tree * splay (ptr_t i, Tree *t) {
 Tree * insert(Tree * t, Tree *new) {
 
     if (t == NULL) {
-	new->left = new->right = NULL;
-	return new;
+        new->left = new->right = NULL;
+        return new;
     }
     t = splay((ptr_t)new, t);
     if (new < t) {
-	new->left = t->left;
-	new->right = t;
-	t->left = NULL;
-	return new;
-    } else if (new >  t) {
-	new->right = t->right;
-	new->left = t;
-	t->right = NULL;
-	return new;
-    } else { /* We get here if it's already in the tree */
-        fprintf(stderr,"Error, allocating block with same address as previously allocated block, %p\n",new);
-	fprintf(stderr,"Please run your program under gdb\n");
-	return 0;
+        new->left = t->left;
+        new->right = t;
+        t->left = NULL;
+        return new;
+    }
+    else if (new > t) {
+        new->right = t->right;
+        new->left = t;
+        t->right = NULL;
+        return new;
+    }
+    else { /* We get here if it's already in the tree */
+        fprintf(stderr, "Error, allocating block with same address as previously allocated block, %p\n", new);
+        fprintf(stderr, "Please run your program under gdb\n");
+        return 0;
     }
 }
 
@@ -140,24 +144,25 @@ Tree * delete(ptr_t i, Tree * t) {
 
     t = splay(i, t);
     if (i == (ptr_t)t) {         /* found it */
-	if (t->left == NULL) {
-	    x = t->right;
-	} else {
-	    x = splay(i, t->left);
-	    x->right = t->right;
-	}
-	t->right = NULL;
-	t->left = NULL;
-	return x;
+        if (t->left == NULL) {
+            x = t->right;
+        }
+        else {
+            x = splay(i, t->left);
+            x->right = t->right;
+        }
+        t->right = NULL;
+        t->left = NULL;
+        return x;
     }
     /* It wasn't there */
-    fprintf(stderr,"Error, attempt to delete block that was not in the allocated tree\n");
-    fprintf(stderr,"\t Block Address:  %p\n",(void *)i);
-    fprintf(stderr,"Please run your program under gdb\n");
+    fprintf(stderr, "Error, attempt to delete block that was not in the allocated tree\n");
+    fprintf(stderr, "\t Block Address:  %p\n", (void *)i);
+    fprintf(stderr, "Please run your program under gdb\n");
     exit(1);
 
-	/* Syntax Purpose */
-	return NULL;
+    /* Syntax Purpose */
+    return NULL;
 }
 
 /******************************************************************************/
@@ -173,27 +178,27 @@ Tree * delete(ptr_t i, Tree * t) {
 /******************************************************************************/
 Tree * contains(ptr_t i, Tree **the_tree)
 {
-  Tree *tmp;
-  int size;
+    Tree *tmp;
+    int size;
 
-  *the_tree = splay(i, *the_tree);
-  tmp = *the_tree;
+    *the_tree = splay(i, *the_tree);
+    tmp = *the_tree;
 
-  if(i < (ptr_t)(tmp) ) {
-    tmp = tmp->left;
-    while(tmp && tmp->right != NULL) {
-      tmp = tmp->right;
+    if (i < (ptr_t)(tmp)) {
+        tmp = tmp->left;
+        while (tmp && tmp->right != NULL) {
+            tmp = tmp->right;
+        }
     }
-  }
 
-  if (tmp) {
-    /* mask out mark bit of size, check if i is in tmp's data area */
-    size = tmp->size & 0xfffffffe;
-    if((i < (ptr_t)tmp + sizeof(Tree)) || (i >= ((ptr_t)tmp + sizeof(Tree) + size)) )
-      tmp = NULL;
-  }
+    if (tmp) {
+        /* mask out mark bit of size, check if i is in tmp's data area */
+        size = tmp->size & 0xfffffffe;
+        if ((i < (ptr_t)tmp + sizeof(Tree)) || (i >= ((ptr_t)tmp + sizeof(Tree) + size)))
+            tmp = NULL;
+    }
 
-  return tmp;
+    return tmp;
 
 }
 
@@ -203,14 +208,14 @@ Tree * contains(ptr_t i, Tree **the_tree)
 /*************************************************************/
 void print_tree(Tree *root, int level)
 {
-  int i;
-  for (i=0; i<level; i++) {
-    fprintf(stderr,"  ");
-  }
-  fprintf(stderr,"cur = %p, l=%p, r=%p\n",root,root->left, root->right);
-  if(root->left != NULL)
-    print_tree(root->left, level+1);
-  if(root->right != NULL)
-    print_tree(root->right, level+1);
+    int i;
+    for (i = 0; i < level; i++) {
+        fprintf(stderr, "  ");
+    }
+    fprintf(stderr, "cur = %p, l=%p, r=%p\n", root, root->left, root->right);
+    if (root->left != NULL)
+        print_tree(root->left, level + 1);
+    if (root->right != NULL)
+        print_tree(root->right, level + 1);
 }
 

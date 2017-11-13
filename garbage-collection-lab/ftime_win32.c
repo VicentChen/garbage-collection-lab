@@ -18,23 +18,23 @@
 
 #define DYNAMIC_ACCURACY 0
 
-/* 
+/*
  * Timing routines
  */
 
 #if DYNAMIC_ACCURACY > 0 
 
-/* Win32: No NEED ON DYNAMIC ACCURACY,
- * As the system-wide ticker is accurate enough without extra cost. 
- */
+ /* Win32: No NEED ON DYNAMIC ACCURACY,
+  * As the system-wide ticker is accurate enough without extra cost.
+  */
 
 
 #else /* DYNAMIC_ACCURACY > 0 */
 
-/* (Win32 Adaptive Realization)
-   Quicker timing version. Uses fixed repeat count
-   and uses gettimeofday. On Linux it is accurate to the microsecond
-   thanks to an implementation using the Pentium cycle counters */
+ /* (Win32 Adaptive Realization)
+    Quicker timing version. Uses fixed repeat count
+    and uses gettimeofday. On Linux it is accurate to the microsecond
+    thanks to an implementation using the Pentium cycle counters */
 
 #define REP_COUNT 10
 
@@ -46,8 +46,8 @@ double ftime_default(test_funct P, double E)
 
     stv = GetTickCount();
     while (cnt) {
-	P();
-	cnt--;
+        P();
+        cnt--;
     }
     etv = GetTickCount();
     diff = (double)(etv - stv);

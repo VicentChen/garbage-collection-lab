@@ -18,14 +18,14 @@ FILE *dumpfile = NULL;
 
 #define DUMP_SUFFIX  ".dump"
 
-char *dump_filename (const char *trace_filename)
+char *dump_filename(const char *trace_filename)
 {
     static char buf[1025];
     char *p;
 
     // Isolate base filename
     p = strrchr(trace_filename, '/');
-    p = (p == NULL) ? (char *)trace_filename : (p+1);
+    p = (p == NULL) ? (char *)trace_filename : (p + 1);
     strcpy(buf, p);
 
     // Replace suffix
@@ -36,7 +36,7 @@ char *dump_filename (const char *trace_filename)
     return buf;
 }
 
-void dump_start (const char *filename)
+void dump_start(const char *filename)
 {
     assert(dumpfile == NULL);
     if ((dumpfile = fopen(filename, "w")) == NULL) {
@@ -45,14 +45,14 @@ void dump_start (const char *filename)
     }
 }
 
-void dump_stop (void)
+void dump_stop(void)
 {
     assert(dumpfile != NULL);
     fclose(dumpfile);
     dumpfile = NULL;
 }
 
-int dump_printf (const char *format, ...)
+int dump_printf(const char *format, ...)
 {
     if (dumpfile != NULL) {
         va_list args;

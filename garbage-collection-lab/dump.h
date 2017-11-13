@@ -15,10 +15,10 @@
 
 extern FILE *dumpfile;
 
-extern char *dump_filename (const char *trace_filename);
-extern void dump_start (const char *filename);
-extern void dump_stop (void);
-extern int dump_printf (const char *format, ...);
+extern char *dump_filename(const char *trace_filename);
+extern void dump_start(const char *filename);
+extern void dump_stop(void);
+extern int dump_printf(const char *format, ...);
 
 
 #endif /* __DUMP_H_ */

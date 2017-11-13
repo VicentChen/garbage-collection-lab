@@ -13,8 +13,8 @@
 
 #include <stdio.h>
 
-extern int gc_init (void);
-extern void *gc_malloc (size_t size);
+extern int gc_init(void);
+extern void *gc_malloc(size_t size);
 
 /* Team information */
 typedef struct {
