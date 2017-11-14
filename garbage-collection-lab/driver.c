@@ -1,11 +1,10 @@
-﻿/* $Id$ */
-
-/*
+﻿/*
  *  Khalil Amiri
  *  amiri+@cs.cmu.edu
  *
  *  CS213 - Fall 99 - Lab assignment 3
- *
+ *  
+ *  modified by Vicent_Chen 2017/11/13
  */
 
 #include <stdio.h>
@@ -29,7 +28,7 @@ void usage(void);
 #define SPACE_UTIL_METRIC_WEIGHT 0.33
 //#define REF_TIME 110.0
 #define REF_TIME 0.035
-#define MIN(a,b) ( (a) < (b) ? (a):(b) )
+#define MIN(a,b) ( (a) < (b) ? (a) : (b) )
 
 /* test data structures */
 typedef struct range_t {
@@ -383,12 +382,10 @@ void correctness(trace_t *trace)
                 /* Keep track of current total size
                  * of all allocated blocks */
                 total_size -= size;
-
                 /* Remove region from list */
                 remove_range(block);
-
                 trace->blocks[index] = NULL;
-
+                block = NULL;
                 break;
             }
         }
