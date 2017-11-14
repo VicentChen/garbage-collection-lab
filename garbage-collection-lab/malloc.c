@@ -13,9 +13,6 @@
 #include <DbgHelp.h>
 #pragma comment( lib, "dbghelp.lib" )
 
-/* Win32: Use PE Const Instead in program environment */
-//#include <elf.h>
-
 #include "memlib.h"
 #include "malloc.h"
 #include "useful.h"
@@ -127,11 +124,6 @@ void gc_add_free(char *addr, list_t *blk) {
 /************************************************************/
 
 typedef struct stack_s {
-    /* You can define the stack data type in any way that you like.
-    * You are allowed to use the standard libc malloc/free
-    * routines for the stack management, if you wish.
-    * DO NOT use gc_malloc!
-    */
     Tree *val;
     struct stack_s *next;
 } stack_t;
@@ -162,7 +154,7 @@ Tree* pop() {
 * link: https://stackoverflow.com/questions/4308996/finding-the-address-range-of-the-data-segment
 *
 */
-void get_data_area(void **start, int *length) {
+void get_data_area(char **start, int *length) {
     HANDLE hModule = GetModuleHandle(NULL);
     // get the location of the module's IMAGE_NT_HEADERS structure
     IMAGE_NT_HEADERS *pNtHdr = ImageNtHeader(hModule);
@@ -174,13 +166,12 @@ void get_data_area(void **start, int *length) {
     char scnName[sizeof(pSectionHdr->Name) + 1];
     scnName[sizeof(scnName) - 1] = '\0'; // enforce nul-termination for scn names that are the whole length of pSectionHdr->Name[]
 
-    for (int scn = 0; scn < pNtHdr->FileHeader.NumberOfSections; ++scn)
-    {
+    for (int scn = 0; scn < pNtHdr->FileHeader.NumberOfSections; ++scn) {
         // Note: pSectionHdr->Name[] is 8 bytes long. If the scn name is 8 bytes long, ->Name[] will
         // not be nul-terminated. For this reason, copy it to a local buffer that's nul-terminated
         // to be sure we only print the real scn name, and no extra garbage beyond it.
         strncpy(scnName, (const char*)pSectionHdr->Name, sizeof(pSectionHdr->Name));
-        if (strcmp(".data", scnName) == 0) {
+        if (!strcmp(".data", scnName)) {
             *start = (void*)(imageBase + pSectionHdr->VirtualAddress);
             *length = (int)(pSectionHdr->Misc.VirtualSize);
         }
@@ -188,29 +179,15 @@ void get_data_area(void **start, int *length) {
     }
 }
 
-#ifndef DEBUG_HEX
-#define DEBUG_HEX 0x005A5000
-#endif
-
 /* Traverse the tree of allocated blocks, collecting
 * pointers to unallocated blocks in the stack s
 */
-void collect_unmarked(Tree *root) {
-    if (root) {
-        // if (root == DEBUG_HEX)
-        //     printf("root scan\n");
-        if (!(root->size & 0x1)) { 
-            /* unreachable */
-            /* Push the root onto your stack.
-            * Define "push" in any way that is appropriate for
-            * your stack data structure
-            */
-            push(root);
-        }
-        root->size &= ~0x1; /* clear for next time */
-        if (root->left) collect_unmarked(root->left);
-        if (root->right) collect_unmarked(root->right);
-    }
+void push_unmarked(Tree *root) {
+    if (root == NULL) return;
+    if (!(root->size & 0x1)) push(root);
+    root->size &= ~0x1; /* clear for next time */
+    if (root->left) push_unmarked(root->left);
+    if (root->right) push_unmarked(root->right);
 }
 
 extern void verify_complete(void);
@@ -225,70 +202,45 @@ extern void verify_garbage(void *addr);
     block_ptr->size |= 0x1;\
   } while(0)
 
-/**
-* comment By Vicent Chen
-* ======================
-* regs: array contains registers
-* pgm_stack: ebp of caller
-*
-*/
 void garbage_collect(int *regs, int pgm_stack) {
-    Tree *alloc_tree = NULL, *target;
-    const char* data_seg_ptr;
-    int registers[3];
-    int top;
-    unsigned i;
     int data_seg_len;
+    int registers[3], top;
+    char* data_seg_ptr;
+    Tree *alloc_tree, *target;
 
-    /* v: initialize */
+    /* initialize */
     GET_CALLEE_REGS(registers);
     PGM_STACK_TOP(top);
-
     alloc_tree = TREE_ROOT;
 
-    /* 0. Make sure there is already allocated memory to
-    *    garbage collect.
-    */
     if (alloc_tree == NULL) return;
 
-    /* 1. collect root pointers by scanning regs, stack, and global data */
-    /* 2. mark nodes that are reachable from the roots and add any pointers
-    *    found in reachable heap memory
-    */
-    /* v: collect from register */
-    for (i = 0; i < 3; i++) {
-        if (target = contains(regs[i], TREE_ROOT_ADDRESS)) {
+    /* MARK */
+    /* collect from register */
+    for (unsigned i = 0; i < 3; i++) {
+        if (target = contains(regs[i], TREE_ROOT_ADDRESS))
             MARK(target);
-        }
     }
-
-    /* v: collect from stack */
+    /* collect from stack */
     top = (*(int*)(*(int*)(*(int*)(top)))); /* v: ebp of main */
-    for (i = pgm_stack; i < top; i += 4) {
-        if (target = contains(*(int*)i, TREE_ROOT_ADDRESS)) {
+    for (unsigned i = pgm_stack; i < top; i += 4) {
+        if (target = contains(*(int*)i, TREE_ROOT_ADDRESS))
             MARK(target);
-        }
     }
-
-    /* v: collect from data segment */
+    /* collect from data segment */
     get_data_area(&data_seg_ptr, &data_seg_len);
-    for (i = 0; i < data_seg_len; i += 4) {
-        if (data_seg_ptr + i == &dseg_lo || data_seg_ptr + i == &dseg_hi) continue;
-        //if (data_seg_ptr + i >= 0x437921 && data_seg_ptr + i <= 0x437958) continue;
-        if (target = contains(*(int*)(data_seg_ptr + i), TREE_ROOT_ADDRESS)) {
+    for (unsigned i = 0; i < data_seg_len; i += 4) {
+        /* skip data_lo, data_hi */
+        if ((unsigned)data_seg_ptr + i == (unsigned)&dseg_lo || (unsigned)data_seg_ptr + i == (unsigned)&dseg_hi)
+            continue;
+        if (target = contains(*(int*)(data_seg_ptr + i), TREE_ROOT_ADDRESS))
             MARK(target);
-        }
     }
 
-    /* 3. collect pointers to all the unmarked (i.e. unreachable) blocks */
+    /* SWEEP */
     alloc_tree = TREE_ROOT;
-    collect_unmarked(alloc_tree);
-
-    /* 4. delete each unmarked block from the allocated tree and
-    *    then place the block on the free list.
-    *    Call verify_garbage with the address previously returned by malloc
-    *    for each block.
-    */
+    push_unmarked(alloc_tree);
+    /* add unmarked to list */
     while (stack != NULL) {
         target = pop();
         verify_garbage((char*)target + sizeof(Tree));
@@ -296,23 +248,16 @@ void garbage_collect(int *regs, int pgm_stack) {
         gc_add_free((char*)LIST_ROOT_ADDRESS, (list_t*)target);
     }
 
-    verify_complete();
+    verify_complete(); /* never modify */
 }
 
-/**
-* comment By Vicent Chen
-* ======================
-* size: size of bytes to allocate
-* return: the usable address
-*
-*/
 void *gc_malloc(size_t size) {
-    list_t *list, *newlist;
-    char *addr, *test;
+    int registers[3], top;
     long foo, mask;
+    char *addr, *test;
+    list_t *list, *newlist;
     Tree *alloc_tree;
-    int registers[3];
-    int top;
+
 
     /* start by getting the callee-save registers and the top of the program
     * stack at this point. Doing this here means that we don't have to search
@@ -323,7 +268,7 @@ void *gc_malloc(size_t size) {
     PGM_STACK_TOP(top);
 
     /* round up size to a power of 8 */
-    size = (size ? ((size >> 3) + !!(size & 7)) << 3 : 8);
+    size = size ? (size >> 3) + !!(size & 7) << 3 : 8;
 
     /* search un-coalesced free list */
     addr = dseg_lo;
@@ -333,7 +278,7 @@ void *gc_malloc(size_t size) {
         list = list->next;
         if (list == *(list_t **)addr) list = NULL;
     }
-    /* v: failed to find a block then GC */
+    /* failed to find a block then GC */
     if (list == NULL) {
         garbage_collect(registers, top);
         /* v: search the free list again*/
@@ -344,13 +289,6 @@ void *gc_malloc(size_t size) {
             if (list == *(list_t **)addr) list = NULL;
         }
     }
-    // if (list != NULL) {
-    //   do {
-    //     if ((unsigned)list->size >= size) break;
-    //     list = list->next;
-    //     if (list == *(list_t **)addr) list = NULL;
-    //   } while (list);
-    // }
 
     /* if we couldn't find a fit then try sbrk */
     /* v: even after GC */
@@ -377,19 +315,11 @@ void *gc_malloc(size_t size) {
     * a space for list_t, and a space for long(the space to use)
     */
     if ((unsigned)list->size < size + sizeof(list_t) + sizeof(long)) {
-        /* give them the whole chunk (we need sizeof(list_t) to hold accounting
-        * information, want at least one usable word if we're going to
-        * keep track of this block!) */
         gc_remove_free(addr, list);
         /* put this block in the allocated tree */
         addr = dseg_lo + sizeof(long);
         alloc_tree = *(Tree **)addr;
         *(Tree **)addr = insert(alloc_tree, (Tree *)list);
-        // if ((char *)list == DEBUG_HEX) {
-        //   //if (contains(list, TREE_ROOT_ADDRESS)) {
-        //     printf("Get you\n");
-        //   //}
-        // }
         return (((char *)list) + sizeof(Tree));
     }
 

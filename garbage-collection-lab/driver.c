@@ -3,7 +3,7 @@
  *  amiri+@cs.cmu.edu
  *
  *  CS213 - Fall 99 - Lab assignment 3
- *  
+ *
  *  modified by Vicent_Chen 2017/11/13
  */
 
@@ -81,8 +81,7 @@ int add_range(char *lo, long size)
     /* Check alignment */
     if (!IS_ALIGNED(lo)) {
         fprintf(stderr, "Misaligned region returned\n");
-        if (verbose)
-            fprintf(stderr, "Address: %p\n", lo);
+        if (verbose) fprintf(stderr, "Address: %p\n", lo);
         return 0;
     }
 
@@ -98,8 +97,7 @@ int add_range(char *lo, long size)
 
     /* Region does not overlap any other region */
     for (p = ranges; p != NULL; p = p->next) {
-        if ((lo >= p->lo && lo <= p->hi) ||
-            (hi >= p->lo && hi <= p->hi)) {
+        if ((lo >= p->lo && lo <= p->hi) || (hi >= p->lo && hi <= p->hi)) {
             fprintf(stderr, "Region overlap detected\n");
             if (verbose) {
                 fprintf(stderr, "Region 1: %p - %p\n", lo, hi);
@@ -128,7 +126,6 @@ void remove_range(char *lo)
     for (p = ranges; p != NULL; p = p->next) {
         if (p->lo == lo) {
             *prevpp = p->next;
-
             p->next = garbage;
             garbage = p;
             break;
@@ -159,9 +156,7 @@ void verify_garbage(char *lo)
         prevpp = &(p->next);
     }
 
-    if (p != NULL) {
-        free(p);
-    }
+    if (p != NULL) free(p);
     else {
         fprintf(stderr, "Failed correctness test, addr %p (head at %p)",
             lo, lo - sizeof(Tree));
@@ -201,9 +196,8 @@ void verify_complete()
     int count = 0;
 
     /*fprintf(stderr,"Verifying garbage collection is complete\n");*/
-    for (p = garbage; p != NULL; p = p->next) {
+    for (p = garbage; p != NULL; p = p->next)
         count++;
-    }
 
     stats->garbage_count = count;
     stats->times_collected++;
@@ -213,13 +207,10 @@ void verify_complete()
      */
     if (stats->garbage_count > 1) {
         fprintf(stderr, "Failed correctness test, too much leftover garbage\n");
-        if (verbose) {
-            print_unfound();
-        }
+        if (verbose) print_unfound();
         fprintf(stderr, "Please run your program under gdb.\n\n");
         exit(1);
     }
-
 }
 
 void clear_ranges(void)
@@ -245,8 +236,7 @@ void clear_ranges(void)
  * Tracefile routines
  *********************/
 
-void
-read_trace(trace_t *trace, char *filename)
+void read_trace(trace_t *trace, char *filename)
 {
     FILE *tracefile;
     long num_blocks, num_ops;
@@ -304,13 +294,10 @@ read_trace(trace_t *trace, char *filename)
             fprintf(stderr, "Operations: %ld\n", num_ops);
             fprintf(stderr, "Weight: %d\n\n", trace->weight);
         }
-
     }
-
 }
 
-void free_trace(trace_t *trace)
-{
+void free_trace(trace_t *trace) {
     free(trace->ops);
     free(trace->block_sizes);
 }
@@ -350,8 +337,7 @@ void correctness(trace_t *trace)
                 if (!add_range(p, size)) {
                     fprintf(stderr, "Failed correctness test!\n");
                     if (verbose)
-                        fprintf(stderr, "Operation: %ld (out of %ld)\n",
-                            i, trace->num_ops);
+                        fprintf(stderr, "Operation: %ld (out of %ld)\n", i, trace->num_ops);
                     fprintf(stderr, "Please run your program under gdb.\n\n");
                     exit(1);
                 }
@@ -391,8 +377,7 @@ void correctness(trace_t *trace)
         }
 
     if (stats->times_collected > 0) {
-        fprintf(stderr, "%d garbage blocks not found by garbage collector\n",
-            stats->garbage_count);
+        fprintf(stderr, "%d garbage blocks not found by garbage collector\n", stats->garbage_count);
         fprintf(stderr, "Correctness test passed\n\n");
     }
     else {
@@ -464,8 +449,7 @@ void dump_write(trace_t *trace)
 
 static trace_t *trace;
 
-static void speed_funct(void)
-{
+static void speed_funct(void) {
     long i;
 
     mem_reinit(0);
@@ -495,8 +479,7 @@ static void speed_funct(void)
 }
 
 
-void speed(trace_t *ptrace, stats_t *sp)
-{
+void speed(trace_t *ptrace, stats_t *sp) {
     trace = ptrace;
     sp->execution_time = ftime(speed_funct, ftime_tolerance);
 
@@ -526,8 +509,7 @@ static test_funct tests[6] = {
 } ;*/
 
 /* No Implementation at all! */
-void pgm_test()
-{
+void pgm_test() {
     /*int i;
     int init_mem;
     for(i=0; i < 6; i++) {
@@ -560,8 +542,7 @@ void pgm_test()
  * Main
  *******/
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     char **fname;
     char c;
     char **tracefiles = default_tracefiles;
@@ -606,12 +587,12 @@ int main(int argc, char *argv[])
                 fprintf(stderr, "Unknown option; use -h for help\n");
                 exit(1);
         }
-    /*   if (tracefiles == NULL) {
-           tracefiles = default_tracefiles;
-           stats->num_tracefiles = sizeof(default_tracefiles) / sizeof(char *) - 1;
-       }*/
+    /*if (tracefiles == NULL) {
+        tracefiles = default_tracefiles;
+        stats->num_tracefiles = sizeof(default_tracefiles) / sizeof(char *) - 1;
+    }*/
 
-       /* Print team info */
+    /* Print team info */
     printf("Teamname: %s\n", team.team);
     printf("Member 1: %s\n", team.name1);
     printf("Email 1: %s\n", team.email1);
@@ -631,7 +612,6 @@ int main(int argc, char *argv[])
     stats->total_time = 0.0;
     stats->total_opt_time = 0.0;
     stats->sum_overall_utilization = 0.0;
-
 
     /* Perform tests */
     if (!pgms_only) {
@@ -653,12 +633,10 @@ int main(int argc, char *argv[])
                test student malloc
             */
             fprintf(stderr, "---- Your Malloc ----------\n");
-            //bzero(trace.blocks, 20000*sizeof(char *)); 
             memset(trace.blocks, 0, 20000 * sizeof(char *));
             correctness(&trace);
             stats->sum_overall_utilization += stats->overall_utilization;
 
-            //bzero(trace.blocks, 20000*sizeof(char *)); 
             memset(trace.blocks, 0, 20000 * sizeof(char *));
             speed(&trace, stats);
             stats->total_time += stats->execution_time;
@@ -674,30 +652,23 @@ int main(int argc, char *argv[])
         printf("All tracefiles read!\n\n");
     }
 
-    if (!traces_only) {
-        pgm_test();
-    }
+    if (!traces_only) pgm_test();
 
     /*
      *  compute/report student malloc stats
      */
 
      /* Calculate final statistics */
-    if (traces_only) {
+    if (traces_only)
         stats->avg_utilization = stats->sum_overall_utilization / (double)stats->num_tracefiles;
-    }
-    else if (pgms_only) {
+    else if (pgms_only)
         stats->avg_utilization = stats->sum_overall_utilization / 2.0;
-    }
-    else {
+    else
         // Win32: Calculation Method Adaptive Modification.
-        //stats->avg_utilization  = stats->sum_overall_utilization / ((double) stats->num_tracefiles + 2);
         stats->avg_utilization = stats->sum_overall_utilization / 6.5;
-    }
 
     stats->p1 = SPACE_UTIL_METRIC_WEIGHT * stats->avg_utilization;
-    stats->p2 = ((double)(1.0 - SPACE_UTIL_METRIC_WEIGHT)) *
-        MIN(1.0, REF_TIME / stats->total_time);
+    stats->p2 = ((double)(1.0 - SPACE_UTIL_METRIC_WEIGHT)) * MIN(1.0, REF_TIME / stats->total_time);
 
     stats->perf_index = stats->p1 + stats->p2;
 
@@ -707,14 +678,11 @@ int main(int argc, char *argv[])
     /* Print final statistics */
     printf("OVERALL STATISTICS (YOUR MALLOC):\n");
     printf("---------------------------------\n");
-    printf("Number of trace files: %d\n",
-        stats->num_tracefiles);
+    printf("Number of trace files: %d\n", stats->num_tracefiles);
     printf("All correctness tests passed\n");
     printf("\n");
-    printf("Average overall utilization: %6.3f%%\n",
-        100 * stats->avg_utilization);
-    printf("Time: %6.3f, total ops: %ld\n",
-        stats->total_time, (long)(stats->total_ops));
+    printf("Average overall utilization: %6.3f%%\n", 100 * stats->avg_utilization);
+    printf("Time: %6.3f, total ops: %ld\n", stats->total_time, (long)(stats->total_ops));
 
     printf(">Performance index: %7.3f\n", stats->perf_index);
     printf("[Note: Performance index is valid only if");
@@ -726,10 +694,7 @@ int main(int argc, char *argv[])
 }
 
 
-void
-usage(void)
-{
-
+void usage(void) {
     fprintf(stderr, "Usage: malloc [-ffile] [-h] [-v|-q]");
     fprintf(stderr, " [-ttolerance] [-d]\n");
 
