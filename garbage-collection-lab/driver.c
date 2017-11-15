@@ -21,8 +21,6 @@
 #include "getopt.h"
 #include "tracefiles.h"
 
-void usage(void);
-
 /* magic numbers */
 /* Win32: REF_TIME Adaptive Modification */
 #define SPACE_UTIL_METRIC_WEIGHT 0.33
@@ -52,6 +50,7 @@ typedef struct {
     size_t *block_sizes;
 } trace_t;
 
+void usage(void);
 
 stats_t *stats;
 
@@ -108,7 +107,6 @@ int add_range(char *lo, long size)
     }
 
     /* Clobber region (zero miswritten control records) */
-    //bzero(lo, size);
     memset(lo, 0, size);
 
     p = (range_t *)malloc(sizeof(range_t));
@@ -310,7 +308,6 @@ void free_trace(trace_t *trace) {
 
 void correctness(trace_t *trace)
 {
-    long i;
     int total_size = 0;
 
     mem_reinit(0);
@@ -323,7 +320,7 @@ void correctness(trace_t *trace)
     stats->min_utilization = DBL_MAX;
     stats->max_total_size = 0;
 
-    for (i = 0; i < trace->num_ops; i++)
+    for (long i = 0; i < trace->num_ops; i++)
         switch (trace->ops[i].type) {
             case ALLOC:
             {
@@ -545,12 +542,11 @@ void pgm_test() {
 int main(int argc, char *argv[]) {
     char **fname;
     char c;
-    char **tracefiles = default_tracefiles;
     int traces_only = 0;
     int pgms_only = 0;
+    char **tracefiles = default_tracefiles;
 
     stats = (stats_t *)malloc(sizeof(stats_t));
-    //bzero(stats, sizeof(stats_t));
     memset(stats, 0, sizeof(stats_t));
 
     while ((c = getopt(argc, argv, "f:hpsvqt:d")) != EOF)
@@ -587,21 +583,7 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "Unknown option; use -h for help\n");
                 exit(1);
         }
-    /*if (tracefiles == NULL) {
-        tracefiles = default_tracefiles;
-        stats->num_tracefiles = sizeof(default_tracefiles) / sizeof(char *) - 1;
-    }*/
-
-    /* Print team info */
-    printf("Teamname: %s\n", team.team);
-    printf("Member 1: %s\n", team.name1);
-    printf("Email 1: %s\n", team.email1);
-    if (*team.name2 || *team.email2) {
-        printf("Member 2: %s\n", team.name2);
-        printf("Email 2: %s\n", team.email2);
-    }
-    printf("\n");
-
+    printf(GC_VERSION_INFO);
     if (verbose)
         printf("Running in verbose mode (use -q for quiet mode)...\n\n");
 
@@ -629,9 +611,7 @@ int main(int argc, char *argv[]) {
 
             stats->total_ops += (double)trace.num_ops;
 
-            /*
-               test student malloc
-            */
+            /* test student malloc */
             fprintf(stderr, "---- Your Malloc ----------\n");
             memset(trace.blocks, 0, 20000 * sizeof(char *));
             correctness(&trace);
@@ -654,9 +634,7 @@ int main(int argc, char *argv[]) {
 
     if (!traces_only) pgm_test();
 
-    /*
-     *  compute/report student malloc stats
-     */
+    /* compute/report student malloc stats */
 
      /* Calculate final statistics */
     if (traces_only)
@@ -679,8 +657,7 @@ int main(int argc, char *argv[]) {
     printf("OVERALL STATISTICS (YOUR MALLOC):\n");
     printf("---------------------------------\n");
     printf("Number of trace files: %d\n", stats->num_tracefiles);
-    printf("All correctness tests passed\n");
-    printf("\n");
+    printf("All correctness tests passed\n\n");
     printf("Average overall utilization: %6.3f%%\n", 100 * stats->avg_utilization);
     printf("Time: %6.3f, total ops: %ld\n", stats->total_time, (long)(stats->total_ops));
 

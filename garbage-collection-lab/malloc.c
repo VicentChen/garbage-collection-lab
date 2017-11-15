@@ -22,18 +22,6 @@
 # define TREE_ROOT_ADDRESS ((Tree**)(dseg_lo + sizeof(long)))
 # define TREE_ROOT (*TREE_ROOT_ADDRESS)
 
-team_t team = {
-    /* Team name to be displayed on webpage */
-    "Vic",
-    /* First member full name */
-    "Vicent Chen",
-    /* First member email address */
-    "1336754721@qq.com",
-    /* Second member full name (leave blank if none) */
-    "",
-    /* Second member email address (blank if none) */
-    ""
-};
 
 /*
 * The free list has a ptr to its head at dseg_lo, and the tree of
@@ -80,31 +68,11 @@ int gc_init(void) {
     return 0;
 }
 
-/* Remove a block from a list; "addr" is the address where
-* the pointer to the head of the list is stored; "blk"
-* is a pointer to the block to remove from the list.
-*/
-void gc_remove_free(char *addr, list_t *blk) {
-    if (blk == blk->next) {
-        LIST_ROOT = NULL;
-        return;
-    }
-
-    if (LIST_ROOT == blk) {
-        LIST_ROOT = blk->next;
-        if (!blk->next->size) assert(0);
-    }
-
-    blk->next->prev = blk->prev;
-    blk->prev->next = blk->next;
-}
-
 /* Add a block to a list; "addr" is the address where
 * the pointer to the head of the list is stored,
 * "blk" is a pointer to the block to add to the list.
 */
-void gc_add_free(char *addr, list_t *blk) {
-
+void gc_add_free(list_t *blk) {
     if (LIST_ROOT == NULL) {
         blk->next = blk->prev = blk;
         LIST_ROOT = blk;
@@ -232,7 +200,7 @@ void garbage_collect(int *regs, int pgm_stack) {
         target = pop();
         verify_garbage((char*)target + sizeof(Tree));
         TREE_ROOT = delete((long)target, TREE_ROOT);
-        gc_add_free((char*)LIST_ROOT_ADDRESS, (list_t*)target);
+        gc_add_free((list_t*)target);
     }
 
     verify_complete(); /* never modify */
@@ -270,26 +238,33 @@ void *gc_malloc(size_t size) {
     if (list == NULL) {
         mask = mem_pagesize() - 1;
         size += sizeof(Tree);
-        /* number of pages needed, ceil( size/pagesize ) */
+        /* ceil( size/pagesize ) */
         foo = (size & ~mask) + !!(size & mask)*mem_pagesize();
         size -= sizeof(Tree);
         list = (list_t *)(dseg_hi + 1);
         if (mem_sbrk(foo) == NULL) return NULL;
         list->size = foo - sizeof(Tree);
-        gc_add_free(dseg_lo, list);
+        gc_add_free(list);
     }
 
     /**
-    * v: not split the block
     * the block to split should have at least
     * a space for list_t, and a space for long(the space to use)
     */
     if ((unsigned)list->size < size + sizeof(list_t) + sizeof(long)) {
         /* give them the whole block */
-        gc_remove_free((char*)LIST_ROOT_ADDRESS, list);
-        /* put this block in the allocated tree */
-        TREE_ROOT = insert(TREE_ROOT, (Tree *)list);
-        return (char *)list + sizeof(Tree);
+        if (list == list->next) {
+            LIST_ROOT = NULL;
+            return;
+        }
+
+        if (LIST_ROOT == list) {
+            LIST_ROOT = list->next;
+            if (!list->next->size) assert(0);
+        }
+
+        list->next->prev = list->prev;
+        list->prev->next = list->next;
     }
     else {
         /* give them the beginning of the block */
@@ -306,10 +281,9 @@ void *gc_malloc(size_t size) {
         }
 
         if (LIST_ROOT == list) LIST_ROOT = newlist;
-
-        /* put this block in the allocated tree */
-        TREE_ROOT = insert(TREE_ROOT, (Tree *)list);
-        return (char *)list + sizeof(Tree);
     }
+    /* put this block in the allocated tree */
+    TREE_ROOT = insert(TREE_ROOT, (Tree *)list);
+    return (char *)list + sizeof(Tree);
 }
 
