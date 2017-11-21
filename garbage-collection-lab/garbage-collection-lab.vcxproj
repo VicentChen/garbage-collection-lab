@@ -26,17 +26,19 @@
     <ClCompile Include="malloc.c" />
     <ClCompile Include="memlib.c" />
     <ClCompile Include="splay_tree.c" />
+    <ClCompile Include="test_driver.cpp" />
+    <ClCompile Include="vm.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="driver.h" />
     <ClInclude Include="dump.h" />
     <ClInclude Include="ftime.h" />
     <ClInclude Include="getopt.h" />
     <ClInclude Include="malloc.h" />
     <ClInclude Include="memlib.h" />
-    <ClInclude Include="tailor.h" />
-    <ClInclude Include="tracefiles.h" />
-    <ClInclude Include="unistd.h" />
+    <ClInclude Include="test_driver.h" />
     <ClInclude Include="useful.h" />
+    <ClInclude Include="vm.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

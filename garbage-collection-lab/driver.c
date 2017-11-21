@@ -14,7 +14,6 @@
 #include "dump.h"
 #include "useful.h"
 #include "getopt.h"
-#include "tracefiles.h"
 #include <float.h>
 #include <assert.h>
 #include <stdlib.h>

@@ -19,6 +19,7 @@
  - tailor.h
 
 # 基于原设计的简单垃圾回收器
+ - `./GC-origin`
  - Finished at 2017/11/14
  - 这是一份作业的简单答案，代码排版混乱，思路不清，原本运行于Virtual Box下的Windows XP。为了移植到Win10 + VS2017做了些许修改。
  - 能够通过基本的测试

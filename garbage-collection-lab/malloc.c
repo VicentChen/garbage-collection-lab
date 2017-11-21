@@ -6,16 +6,15 @@
 *  collect version: origin
 */
 
+#include "memlib.h"
+#include "malloc.h"
+#include "useful.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <Windows.h>
 #include <DbgHelp.h>
 #pragma comment( lib, "dbghelp.lib" )
-
-#include "memlib.h"
-#include "malloc.h"
-#include "useful.h"
 
 # define LIST_ROOT_ADDRESS ((list_t**)dseg_lo)
 # define LIST_ROOT (*LIST_ROOT_ADDRESS)
@@ -169,19 +168,25 @@ void garbage_collect(int *regs, int pgm_stack) {
     char *data_seg_ptr;
     Tree *target;
 
+    long rcount = 0, scount = 0, gcount = 0;
+
     if (TREE_ROOT == NULL) return;
 
     /* MARK */
     /* collect from register */
     for (unsigned i = 0; i < 3; i++) {
-        if (target = contains(regs[i], TREE_ROOT_ADDRESS))
+        if (target = contains(regs[i], TREE_ROOT_ADDRESS)) {
             MARK(target);
+            rcount++;
+        }
     }
     /* collect from stack */
     top = (*(int*)(*(int*)(pgm_stack))); /* v: ebp of main */
     for (unsigned i = pgm_stack; i < top; i += 4) {
-        if (target = contains(*(int*)i, TREE_ROOT_ADDRESS))
+        if (target = contains(*(int*)i, TREE_ROOT_ADDRESS)) {
             MARK(target);
+            scount++;
+        }
     }
     /* collect from data segment */
     get_data_area(&data_seg_ptr, &data_seg_len);
@@ -189,8 +194,10 @@ void garbage_collect(int *regs, int pgm_stack) {
         /* skip data_lo, data_hi */
         if ((unsigned)data_seg_ptr + i == (unsigned)&dseg_lo || (unsigned)data_seg_ptr + i == (unsigned)&dseg_hi)
             continue;
-        if (target = contains(*(int*)(data_seg_ptr + i), TREE_ROOT_ADDRESS))
+        if (target = contains(*(int*)(data_seg_ptr + i), TREE_ROOT_ADDRESS)) {
             MARK(target);
+            gcount++;
+        }
     }
 
     /* SWEEP */

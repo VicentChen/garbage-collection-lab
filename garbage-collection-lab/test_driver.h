@@ -1,9 +1,12 @@
-﻿#ifndef __TRACEFILES_H_
-#define __TRACEFILES_H_
+#ifndef TEST_DRIVER_H__
+#define TEST_DRIVER_H__
+#include <stdio.h>
 
-/* $Id$ */
+typedef struct {
+    
+} test_status;
 
-extern char* default_tracefiles[] = {
+static char* default_tracefiles[] = {
     "kernels/amptjp.rep",
     "kernels/cccp.rep",
     "kernels/expr.rep",
@@ -16,5 +19,5 @@ extern char* default_tracefiles[] = {
     NULL
 };
 
-#endif /* __TRACEFILES_H_ */
+#endif
 

@@ -1,18 +1,14 @@
-﻿/* $Id$ */
-
-/*
+﻿/*
  *
  *  CS213 - Lab assignment 3
  *
  */
 
-#include <stdio.h>
+#include "dump.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 #include <stdarg.h>
-
-#include "dump.h"
 
 FILE *dumpfile = NULL;
 

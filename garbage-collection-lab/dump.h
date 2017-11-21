@@ -1,8 +1,5 @@
 ﻿#ifndef __DUMP_H_
 #define __DUMP_H_
-
-/* $Id$ */
-
 /*
  *  Papadimitriou Spiros
  *  spapadim@cs.cmu.edu

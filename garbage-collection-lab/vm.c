@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 vm_option vm_params;
 vm_status vm;
@@ -31,14 +32,6 @@ int vm_init(vm_status *vm_info) {
     if (vm_info != NULL) memcpy(&vm, vm_info, sizeof(vm_status));
     vm_init_default();
     return VM_OK;
-}
-
-void show_vm_info() {
-    printf("%s\n", vm.name);
-    printf("==========\n");
-    printf("Memory Size: %ld\n", vm.memory_size);
-    printf("Memory Region: %x - %x\n", vm.memory_begin, vm.memory_end);
-    printf("==========\n");
 }
 
 int vm_boot() {
@@ -75,21 +68,6 @@ int vm_shutdown() {
     return VM_OK;
 }
 
-int vm_allocate(long memory_size) {
-    // \TODO
-    return VM_OUT_OF_MEMORY;
-}
-
-void vm_shell_help() {
-    printf("\thelp: Show this message\n");
-    printf("\ttest: Run GC test program\n");
-    printf("\tquiet: Run in quiet mode\n");
-    printf("\tverbose: Run in verbose mode\n");
-    printf("\treboot: Reboot this machine\n");
-    printf("\tshutdown: Shutdown this machine\n");
-    printf("\texit: Shutdown this machine\n");
-}
-
 #define CHECK_COMMAND(s, command, size)\
     (strlen(command) == size && strncmp(s, command, size) == 0)
 #define PROMPT_UNKNOWN()\
@@ -97,7 +75,6 @@ void vm_shell_help() {
         printf("Unknown Options\n");\
         vm_shell_help();\
     }while(0)
-
 #define MAX_COMMAND_CHARS 10
 void vm_shell() {
     char command[MAX_COMMAND_CHARS];
@@ -106,8 +83,10 @@ void vm_shell() {
     while (scanf_s("%s", command, MAX_COMMAND_CHARS)) {
         switch (*command) {
             case 't':
-                if (CHECK_COMMAND("test", command, 4)) printf("test running\n"); 
-                // \TODO
+                if (CHECK_COMMAND("test", command, 4)) {
+                    printf("test running\n");
+                    // \TODO test program
+                }
                 else PROMPT_UNKNOWN();
                 break;
             case 'h':
@@ -140,19 +119,50 @@ void vm_shell() {
                 if (CHECK_COMMAND("exit", command, 4)) return;
                 else PROMPT_UNKNOWN();
                 break;
+            case 'c':
+                if (CHECK_COMMAND("clear", command, 5)) {
+                    system("cls");
+                    show_vm_info();
+                }
+                else PROMPT_UNKNOWN();
+                break;
             default: PROMPT_UNKNOWN(); break;
         }
         printf("> ");
     }
 }
 
+int vm_allocate(long memory_size) {
+    // \TODO
+    return VM_OUT_OF_MEMORY;
+}
+
+void show_vm_info() {
+    printf("%s\n", vm.name);
+    printf("==========\n");
+    printf("Memory Size: %ld\n", vm.memory_size);
+    printf("Memory Region: %x - %x\n", vm.memory_begin, vm.memory_end);
+    printf("==========\n");
+}
+
+void vm_shell_help() {
+    printf("\thelp: Show this message\n");
+    printf("\ttest: Run GC test program\n");
+    printf("\tquiet: Run in quiet mode\n");
+    printf("\tverbose: Run in verbose mode\n");
+    printf("\treboot: Reboot this machine\n");
+    printf("\tshutdown: Shutdown this machine\n");
+    printf("\texit: Shutdown this machine\n");
+}
+
 int main(int argc, char* argv[]) {
 #ifdef _WINDOWS
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
-    vm_init(NULL);
-    vm_boot();
+    int ret;
+    if((ret = vm_init(NULL)) != VM_OK) EXCEPTION_THROW_INT(ret);
+    if ((ret = vm_boot()) != VM_OK) EXCEPTION_THROW_INT(ret);
     vm_shell();
-    vm_shutdown();
+    if ((ret = vm_shutdown()) != VM_OK) EXCEPTION_THROW_INT(ret);
     return 0;
 }
