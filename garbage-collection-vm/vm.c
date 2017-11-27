@@ -5,6 +5,7 @@
 #endif
 
 #include "vm.h"
+#include "test_driver.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -84,7 +85,7 @@ void vm_shell() {
         switch (*command) {
             case 't':
                 if (CHECK_COMMAND("test", command, 4)) {
-                    printf("test running\n");
+					test_todo();
                     // \TODO test program
                 }
                 else PROMPT_UNKNOWN();

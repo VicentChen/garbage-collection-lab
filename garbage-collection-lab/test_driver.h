@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 typedef struct {
-    
+	int score;
 } test_status;
 
 static char* default_tracefiles[] = {
@@ -18,6 +18,8 @@ static char* default_tracefiles[] = {
     //"artificial/random2.rep",
     NULL
 };
+
+extern void test_todo();
 
 #endif
 

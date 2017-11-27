@@ -13,3 +13,7 @@ void test_driver(char** trace_files) {
         
     }
 }
+
+void test_todo() {
+	printf("test todo\n");
+}
